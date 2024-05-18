@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'mptt',
 
+
     'aw_product.apps.AwProductConfig'
 
 
