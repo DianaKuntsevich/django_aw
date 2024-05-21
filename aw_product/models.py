@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.contrib.auth import get_user_model
+from mptt.models import MPTTModel, TreeForeignKey
 
 User = get_user_model()
 
@@ -22,8 +23,7 @@ class Auto(models.Model):
                                related_name='author_post', default=1)
     description = models.TextField(verbose_name='Описание')
     exchange = models.BooleanField(verbose_name='Обмен', default=False)
-    organization = models.ForeignKey(to=User, verbose_name='Организация', on_delete=models.SET_DEFAULT,
-                                     related_name='author_post', default=1)
+    organization = models.CharField(verbose_name='Организация', max_length=255)
     year = models.CharField(verbose_name='Год выпуска авто', max_length=255)
     brand = models.CharField(verbose_name='Бренд', max_length=255)
     model = models.CharField(verbose_name='Модель', max_length=255)
@@ -72,6 +72,9 @@ class Auto(models.Model):
     time_create = models.DateTimeField(auto_now_add=True, verbose_name='Время добавления')
     time_update = models.DateTimeField(auto_now=True, verbose_name='Время обновления')
     status = models.CharField(choices=STATUS_OPTIONS, default='published', verbose_name='Статус поста', max_length=10)
+    category = TreeForeignKey('Category', on_delete=models.PROTECT, related_name='articles', verbose_name='Категория')
+    fixed = models.BooleanField(verbose_name='Зафиксировано', default=False)
+
 
     class Meta:
         verbose_name = 'Автомобиль'
@@ -86,7 +89,6 @@ class Auto(models.Model):
 
 
 class Image(models.Model):
-
     image = models.URLField(max_length=255, unique=True)
     auto = models.ForeignKey(Auto, on_delete=models.CASCADE, related_name='images')
 
@@ -96,3 +98,29 @@ class Image(models.Model):
 
     def __str__(self):
         return self.image
+
+
+class Category(MPTTModel):
+    title = models.CharField(max_length=255, verbose_name='Название категории')
+    slug = models.SlugField(max_length=255, verbose_name='URL категории', blank=True)
+    description = models.TextField(verbose_name='Описание категории', max_length=300)
+    parent = TreeForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name='children',
+        verbose_name='Родительская категория'
+    )
+
+    class MPTTMeta:
+        order_insertion_by = ('title',)
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        db_table = 'app_categories'
+
+    def __str__(self):
+        return self.title
