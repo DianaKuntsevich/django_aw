@@ -7,6 +7,7 @@ User = get_user_model()
 
 
 class Auto(models.Model):
+    objects = None
     STATUS_OPTIONS = (
         ('published', 'Опубликовано'),
         ('draft', 'Черновик')
@@ -77,7 +78,7 @@ class Auto(models.Model):
     thumbnail = models.ImageField(
         verbose_name='Превью объявления',
         blank=True,
-        upload_to='images/thumbnails/',
+        upload_to='images/thumbnails/%Y/%m/%d/',
         validators=[FileExtensionValidator(allowed_extensions=('png', 'jpg', 'webp', 'jpeg', 'gif'))]
     )
 
