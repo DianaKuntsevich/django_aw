@@ -74,7 +74,12 @@ class Auto(models.Model):
     status = models.CharField(choices=STATUS_OPTIONS, default='published', verbose_name='Статус поста', max_length=10)
     category = TreeForeignKey('Category', on_delete=models.PROTECT, related_name='articles', verbose_name='Категория')
     fixed = models.BooleanField(verbose_name='Зафиксировано', default=False)
-
+    thumbnail = models.ImageField(
+        verbose_name='Превью объявления',
+        blank=True,
+        upload_to='images/thumbnails/',
+        validators=[FileExtensionValidator(allowed_extensions=('png', 'jpg', 'webp', 'jpeg', 'gif'))]
+    )
 
     class Meta:
         verbose_name = 'Автомобиль'
